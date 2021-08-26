@@ -71,11 +71,19 @@ class DofbotEnv(gym.Env):
     def reset(self):
         self.step_counter = 0
         p.resetSimulation()
-        p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,0) # we will enable rendering after we loaded everything
-        urdfRootPath=pybullet_data.getDataPath()
+        p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,0)
         p.setGravity(0,0,-9.8)
-
+        
+        # get current path
+        urdfRootPath=pybullet_data.getDataPath()
+        
+        # load plane URDF
         planeUid = p.loadURDF(os.path.join(urdfRootPath,"plane.urdf"), basePosition=[0,0,-0.65])
+        # load table URDF
+        tableUid = p.loadURDF(os.path.join(urdfRootPath, "table/table.urdf"),basePosition=[0.5,0,-0.65])
+        dofbot_path = os.path.join(os.path.dirname(__file__), 'arm.urdf')
+        # load DOFBOT URDF
+        self.armUid = p.loadURDF(dofbot_path, basePosition=[0.75,-0.2,0], useFixedBase=True)
 
         rest_poses = [0,-0.215,0,-2.57,0,2.356,2.356,0.08,0.08]
         self.pandaUid = p.loadURDF(os.path.join(urdfRootPath, "franka_panda/panda.urdf"),useFixedBase=True)
@@ -84,49 +92,48 @@ class DofbotEnv(gym.Env):
         p.resetJointState(self.pandaUid, 9, 0.08)
         p.resetJointState(self.pandaUid,10, 0.08)
         
-        # fixed table and tray position
-        tableUid = p.loadURDF(os.path.join(urdfRootPath, "table/table.urdf"),basePosition=[0.5,0,-0.65])
-        
-        # we do not need a tray
-        # trayUid = p.loadURDF(os.path.join(urdfRootPath, "tray/traybox.urdf"),basePosition=[0.65,0,0])
-        
-        f_name = os.path.join(os.path.dirname(__file__), 'arm.urdf')
-        
-        
-        # fix the base position
-        self.armUid = p.loadURDF(f_name, basePosition=[0.75,-0.2,0], useFixedBase=True)
-        
+        # change the appearance of DOFBOT parts
         p.changeVisualShape(self.armUid, -1, rgbaColor=[0,0,0,1])
-        p.changeVisualShape(self.armUid, 0, rgbaColor=[0,0,1,1])
-        p.changeVisualShape(self.armUid, 1, rgbaColor=[0,1,0,1])
+        p.changeVisualShape(self.armUid, 0, rgbaColor=[0,1,0,1])
+        p.changeVisualShape(self.armUid, 1, rgbaColor=[1,1,0,1])
         p.changeVisualShape(self.armUid, 2, rgbaColor=[0,1,0,1])
-        p.changeVisualShape(self.armUid, 3, rgbaColor=[0.753,0.753,0.753,1])
+        p.changeVisualShape(self.armUid, 3, rgbaColor=[1,0.647,0,1])
         p.changeVisualShape(self.armUid, 4, rgbaColor=[0,0,0,1])
         
+        # reset pose of all DOFBOT joints
+        rest_poses_dofbot = [0, 0, 0, 0, 0]
         
-        state_arm_0 = p.getLinkState(self.armUid, 0)
-        state_arm_1 = p.getLinkState(self.armUid, 1)
-        state_arm_2 = p.getLinkState(self.armUid, 2)
-        state_arm_3 = p.getLinkState(self.armUid, 3)
-        state_arm_4 = p.getLinkState(self.armUid, 4)
-        # state_arm_5 = p.getLinkState(self.armUid, 5)[0]
-        # state_arm_6 = p.getLinkState(self.armUid, 6)[0]
-        # state_arm_4 = p.getLinkState(self.armUid, 4)[0]
+        for i in range(5):
+            p.resetJointState(self.armUid,i, rest_poses_dofbot[i])
+              
+        
+        
+        state_arm_0 = p.getLinkState(self.armUid, 0)[0]
+        state_arm_1 = p.getLinkState(self.armUid, 1)[0]
+        state_arm_2 = p.getLinkState(self.armUid, 2)[0]
+        state_arm_3 = p.getLinkState(self.armUid, 3)[0]
+        state_arm_4 = p.getLinkState(self.armUid, 4)[0]
+        
         print("arm state 0: ", state_arm_0)
         print("arm state 1: ", state_arm_1)
         print("arm state 2: ", state_arm_2)
         print("arm state 3: ", state_arm_3)
         print("arm state 4: ", state_arm_4)
-        # print("arm state 5: ", state_arm_5)
-        # print("arm state 6: ", state_arm_6)
-
+        
+        # randomly place the object
         state_object= [random.uniform(0.5,0.8),random.uniform(-0.2,0.2),0.05]
         self.objectUid = p.loadURDF(os.path.join(urdfRootPath, "random_urdfs/000/000.urdf"), basePosition=state_object)
+        
         state_robot = p.getLinkState(self.pandaUid, 11)[0]
+        
+        state_dofbot = p.getLinkState(self.armUid, 4)[0]
+        
+        
         state_fingers = (p.getJointState(self.pandaUid,9)[0], p.getJointState(self.pandaUid, 10)[0])
         self.observation = state_robot + state_fingers
         p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,1)
         return np.array(self.observation).astype(np.float32)
+
 
     def render(self, mode='human'):
         view_matrix = p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=[0.7,0,0.05],
