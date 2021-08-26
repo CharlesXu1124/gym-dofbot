@@ -1,0 +1,11 @@
+README.md
+setup.py
+gym_dofbot/__init__.py
+gym_dofbot.egg-info/PKG-INFO
+gym_dofbot.egg-info/SOURCES.txt
+gym_dofbot.egg-info/dependency_links.txt
+gym_dofbot.egg-info/requires.txt
+gym_dofbot.egg-info/top_level.txt
+gym_dofbot/envs/__init__.py
+gym_dofbot/envs/dofbot_env.py
+gym_dofbot/envs/trial.py
