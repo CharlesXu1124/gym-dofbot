@@ -31,20 +31,34 @@ class DofbotEnv(gym.Env):
         dz = action[2] * dv
         fingers = action[3]
 
-        currentPose = p.getLinkState(self.pandaUid, 11)
-        currentPosition = currentPose[0]
-        newPosition = [currentPosition[0] + dx,
-                       currentPosition[1] + dy,
-                       currentPosition[2] + dz]
-        jointPoses = p.calculateInverseKinematics(self.pandaUid,11,newPosition, orientation)[0:7]
-
-        p.setJointMotorControlArray(self.pandaUid, list(range(7))+[9,10], p.POSITION_CONTROL, list(jointPoses)+2*[fingers])
-
+        # currentPose = p.getLinkState(self.pandaUid, 11)
+        currentDofbotPose = p.getLinkState(self.armUid, 4)
+        
+        currentDofbotPosition = currentDofbotPose[0]
+        newDofbotPosition = [currentDofbotPosition[0] + dx,
+                             currentDofbotPosition[0] + dy,
+                             currentDofbotPosition[0] + dz,]
+        
+        jointPosesDofbot = p.calculateInverseKinematics(self.armUid, 4, newDofbotPosition, orientation)[0:5]
+        p.setJointMotorControlArray(self.armUid, list(range(5)), p.POSITION_CONTROL, list(jointPosesDofbot))
         p.stepSimulation()
+        
+        state_dofbot = p.getLinkState(self.armUid, 4)[0]
+        
+        
+        # currentPosition = currentPose[0]
+        # newPosition = [currentPosition[0] + dx,
+        #                currentPosition[1] + dy,
+        #                currentPosition[2] + dz]
+        # jointPoses = p.calculateInverseKinematics(self.pandaUid,11,newPosition, orientation)[0:7]
+
+        # p.setJointMotorControlArray(self.pandaUid, list(range(7))+[9,10], p.POSITION_CONTROL, list(jointPoses)+2*[fingers])
+
+        # p.stepSimulation()
 
         state_object, _ = p.getBasePositionAndOrientation(self.objectUid)
-        state_robot = p.getLinkState(self.pandaUid, 11)[0]
-        state_fingers = (p.getJointState(self.pandaUid,9)[0], p.getJointState(self.pandaUid, 10)[0])
+        # state_robot = p.getLinkState(self.pandaUid, 11)[0]
+        # state_fingers = (p.getJointState(self.pandaUid,9)[0], p.getJointState(self.pandaUid,10)[0])
         
         
         # state_arm = p.getLinkState(self.armUid, 5)
@@ -65,7 +79,7 @@ class DofbotEnv(gym.Env):
             done = True
 
         info = {'object_position': state_object}
-        self.observation = state_robot + state_fingers
+        self.observation = state_dofbot
         return np.array(self.observation).astype(np.float32), reward, done, info
 
     def reset(self):
@@ -85,12 +99,12 @@ class DofbotEnv(gym.Env):
         # load DOFBOT URDF
         self.armUid = p.loadURDF(dofbot_path, basePosition=[0.75,-0.2,0], useFixedBase=True)
 
-        rest_poses = [0,-0.215,0,-2.57,0,2.356,2.356,0.08,0.08]
-        self.pandaUid = p.loadURDF(os.path.join(urdfRootPath, "franka_panda/panda.urdf"),useFixedBase=True)
-        for i in range(7):
-            p.resetJointState(self.pandaUid,i, rest_poses[i])
-        p.resetJointState(self.pandaUid, 9, 0.08)
-        p.resetJointState(self.pandaUid,10, 0.08)
+        # rest_poses = [0,-0.215,0,-2.57,0,2.356,2.356,0.08,0.08]
+        # self.pandaUid = p.loadURDF(os.path.join(urdfRootPath, "franka_panda/panda.urdf"),useFixedBase=True)
+        # for i in range(7):
+        #     p.resetJointState(self.pandaUid,i, rest_poses[i])
+        # p.resetJointState(self.pandaUid, 9, 0.08)
+        # p.resetJointState(self.pandaUid,10, 0.08)
         
         # change the appearance of DOFBOT parts
         p.changeVisualShape(self.armUid, -1, rgbaColor=[0,0,0,1])
@@ -114,24 +128,26 @@ class DofbotEnv(gym.Env):
         state_arm_3 = p.getLinkState(self.armUid, 3)[0]
         state_arm_4 = p.getLinkState(self.armUid, 4)[0]
         
-        print("arm state 0: ", state_arm_0)
-        print("arm state 1: ", state_arm_1)
-        print("arm state 2: ", state_arm_2)
-        print("arm state 3: ", state_arm_3)
-        print("arm state 4: ", state_arm_4)
+        print("Link 0 position: ", state_arm_0)
+        print("Link 1 position: ", state_arm_1)
+        print("Link 2 position: ", state_arm_2)
+        print("Link 3 position: ", state_arm_3)
+        print("Link 4 position: ", state_arm_4)
         
         # randomly place the object
         state_object= [random.uniform(0.5,0.8),random.uniform(-0.2,0.2),0.05]
         self.objectUid = p.loadURDF(os.path.join(urdfRootPath, "random_urdfs/000/000.urdf"), basePosition=state_object)
         
-        state_robot = p.getLinkState(self.pandaUid, 11)[0]
+        # state_robot = p.getLinkState(self.pandaUid, 11)[0]
         
         state_dofbot = p.getLinkState(self.armUid, 4)[0]
         
         
-        state_fingers = (p.getJointState(self.pandaUid,9)[0], p.getJointState(self.pandaUid, 10)[0])
-        self.observation = state_robot + state_fingers
+        # state_fingers = (p.getJointState(self.pandaUid,9)[0], p.getJointState(self.pandaUid, 10)[0])
+        self.observation = state_dofbot
         p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,1)
+        
+        
         return np.array(self.observation).astype(np.float32)
 
 
