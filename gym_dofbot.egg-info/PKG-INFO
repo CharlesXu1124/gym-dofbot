@@ -2,7 +2,7 @@ Metadata-Version: 2.1
 Name: gym-dofbot
 Version: 0.0.1
 Summary: A OpenAI Gym Env for Yahboom DOFBOT robotic arm
-Home-page: UNKNOWN
+Home-page: https://github.com/CharlesXu1124/gym-dofbot
 License: UNKNOWN
 Description: UNKNOWN
 Platform: UNKNOWN
