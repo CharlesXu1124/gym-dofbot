@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<robot name="arm">
+<robot name="dofbot">
     <link name="base_link">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
@@ -89,7 +89,7 @@
         <axis xyz="0 0 1" />
         <limit effort="30" velocity="1.0" lower="-1.5708" upper="1.5708"/>
     </joint>
-    <link name="link4">
+    <link name="camera_base">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
@@ -105,16 +105,22 @@
                 <mesh filename="meshes/link4.STL" />
             </geometry>
         </collision>
+        <inertial>
+            <mass value="0.00001"/>
+            <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
+        </inertial>
     </link>
     <joint name="joint4" type="revolute">
         <origin xyz="-0.08285 0 0" rpy="0 0 0.0083081" />
+        <!-- <origin xyz="-0.1595 -0.017925 -0.01925" rpy="0 0 0.0083081" /> -->
         <parent link="link3" />
-        <child link="link4" />
+        <child link="camera_base" />
         <axis xyz="0 0 1" />
         <limit effort="30" velocity="1.0" lower="-1.5708" upper="1.5708"/>
     </joint>
-    <!-- link5 -->
-    <link name="link5">
+
+    <!-- link 5 -->
+    <link name="gripper">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
@@ -131,12 +137,100 @@
             </geometry>
         </collision>
     </link>
-    <!-- joint5 -->
+    <!-- joint 5 -->
     <joint name="joint5" type="revolute">
         <origin xyz="-0.07385 -0.001 0" rpy="0 -1.57 0"/>
+        <!-- <origin xyz="0.004 0.0125 0.02" rpy="0 -1.57 0"/> -->
         <axis xyz="0 0 1"/>
-        <parent link="link4"/>
-        <child link="link5"/>
+        <parent link="camera_base"/>
+        <child link="gripper"/>
+        <limit effort="30" velocity="1.0" lower="-1.5708" upper="3.1416"/>
+    </joint>
+
+    <!-- link 6 -->
+    <link name="camera_lens">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="meshes/camera_lens.STL"/>
+            </geometry>
+            <material name="">
+                <color rgba="1 1 1 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="meshes/camera_lens.STL" />
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- joint 6 -->
+    <joint name="joint6" type="fixed">
+        <origin xyz="-0.05385 -0.0645 -0.0075" rpy="0 -1.57 0"/>
+        <!-- <origin xyz="0.004 -0.0625 0.003" rpy="0 0 0"/> -->
+        <axis xyz="0 0 1"/>
+        <parent link="camera_base"/>
+        <child link="camera_lens"/>
+        <limit effort="30" velocity="1.0" lower="-1.5708" upper="3.1416"/>
+    </joint>
+
+    <!-- link 7 -->
+    <link name="camera_target">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="meshes/camera_lens.STL"/>
+            </geometry>
+            <material name="">
+                <color rgba="1 1 1 1" />
+            </material>
+        </visual>
+        <!-- <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="meshes/camera_lens.STL" />
+            </geometry>
+        </collision> -->
+    </link>
+
+    <!-- joint 7 -->
+    <joint name="joint7" type="fixed">
+        <!-- <origin xyz="-0.07385 -0.001 0" rpy="0 -1.57 0"/> -->
+        <origin xyz="0 0 0.1" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <parent link="camera_lens"/>
+        <child link="camera_target"/>
+        <limit effort="30" velocity="1.0" lower="-1.5708" upper="3.1416"/>
+    </joint>
+
+    <!-- link 8 -->
+    <link name="grasp_target">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="meshes/camera_lens.STL"/>
+            </geometry>
+            <material name="">
+                <color rgba="1 1 1 1" />
+            </material>
+        </visual>
+        <!-- <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="meshes/camera_lens.STL" />
+            </geometry>
+        </collision> -->
+    </link>
+
+    <!-- joint 8 -->
+    <joint name="joint8" type="fixed">
+        <!-- <origin xyz="-0.07385 -0.001 0" rpy="0 -1.57 0"/> -->
+        <origin xyz="0 0.06 0.1" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <parent link="camera_lens"/>
+        <child link="grasp_target"/>
         <limit effort="30" velocity="1.0" lower="-1.5708" upper="3.1416"/>
     </joint>
 </robot>
