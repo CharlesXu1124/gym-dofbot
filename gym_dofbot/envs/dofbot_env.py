@@ -18,28 +18,12 @@ class DofbotEnv(gym.Env):
     def __init__(self):
         self.step_counter = 0
         p.connect(p.GUI)
-        p.resetDebugVisualizerCamera(cameraDistance=1.5, cameraYaw=0, cameraPitch=-40, cameraTargetPosition=[0.55,-0.35,0.2])
+        # p.resetDebugVisualizerCamera(cameraDistance=1.5, cameraYaw=0, cameraPitch=-40, cameraTargetPosition=[0.55,-0.35,0.2])
         self.action_space = spaces.Box(np.array([-1]*5), np.array([1]*5))
         self.observation_space = spaces.Box(np.array([-1]*5), np.array([1]*5))
 
     def step(self, action):
         p.configureDebugVisualizer(p.COV_ENABLE_SINGLE_STEP_RENDERING)
-        # orientation = p.getQuaternionFromEuler([0.,-math.pi,math.pi/2.])
-        # dv = 0.005
-        # dx = action[0] * dv
-        # dy = action[1] * dv
-        # dz = action[2] * dv
-        
-        
-        # currentDofbotPose = p.getLinkState(self.armUid, 4)
-        
-        # currentDofbotPosition = currentDofbotPose[0]
-        # newDofbotPosition = [currentDofbotPosition[0] + dx,
-        #                      currentDofbotPosition[0] + dy,
-        #                      currentDofbotPosition[0] + dz,]
-        
-        # jointPosesDofbot = p.calculateInverseKinematics(self.armUid, 4, newDofbotPosition, orientation)[0:5]
-        # p.setJointMotorControlArray(self.armUid, list(range(5)), p.POSITION_CONTROL, list(jointPosesDofbot))
         
         # perform the action
         for i in range(5):
@@ -48,6 +32,10 @@ class DofbotEnv(gym.Env):
         p.stepSimulation()
         state_dofbot = p.getLinkState(self.armUid, 4)[0]
         state_object, _ = p.getBasePositionAndOrientation(self.objectUid)
+        
+        self.camera_pos = p.getLinkState(self.armUid, 6)[0]
+        self.cameraTargetPosition = p.getLinkState(self.armUid, 7)[0]
+        # self.camera_bearing = p.getLinkState(self.armUid, 3)[1]
 
 
         if state_object[2]>0.45:
@@ -91,14 +79,15 @@ class DofbotEnv(gym.Env):
         p.changeVisualShape(self.armUid, 2, rgbaColor=[0,1,0,1])
         p.changeVisualShape(self.armUid, 3, rgbaColor=[1,0.647,0,1])
         p.changeVisualShape(self.armUid, 4, rgbaColor=[0,0,0,1])
-        
+        p.changeVisualShape(self.armUid, 5, rgbaColor=[0,0,0,1])
+        p.changeVisualShape(self.armUid, 6, rgbaColor=[0,0,1,0])
+        p.changeVisualShape(self.armUid, 7, rgbaColor=[0,0,0,0])
+        p.changeVisualShape(self.armUid, 8, rgbaColor=[1,0,0,0.5])
         # reset pose of all DOFBOT joints
-        rest_poses_dofbot = [0, 0, 0, 0, 0]
+        rest_poses_dofbot = [0, 0, 0, 0, 0] # stay upright
         
         for i in range(5):
             p.resetJointState(self.armUid,i, rest_poses_dofbot[i])
-              
-        
         
         state_arm_0 = p.getLinkState(self.armUid, 0)[0]
         state_arm_1 = p.getLinkState(self.armUid, 1)[0]
@@ -111,6 +100,10 @@ class DofbotEnv(gym.Env):
         print("Link 2 position: ", state_arm_2)
         print("Link 3 position: ", state_arm_3)
         print("Link 4 position: ", state_arm_4)
+        
+        self.camera_pos = p.getLinkState(self.armUid, 6)[0]
+        self.cameraTargetPosition = p.getLinkState(self.armUid, 7)[0]
+        # self.camera_bearing = p.getLinkState(self.armUid, 3)[1]
         
         # randomly place the object (somewhere near the DOFBOT)
         state_object= [random.uniform(0.8,1.2),random.uniform(-0.1,0.3),0.05]
@@ -128,24 +121,22 @@ class DofbotEnv(gym.Env):
 
 
     def render(self, mode='human'):
-        view_matrix = p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=[0.7,0,0.05],
-                                                            distance=.7,
-                                                            yaw=90,
-                                                            pitch=-70,
-                                                            roll=0,
-                                                            upAxisIndex=2)
-        proj_matrix = p.computeProjectionMatrixFOV(fov=60,
-                                                     aspect=float(960) /720,
+        view_matrix = p.computeViewMatrix(cameraEyePosition=self.camera_pos,
+                                                            cameraTargetPosition=self.cameraTargetPosition,
+                                                            cameraUpVector=[0, 0, 1])
+        proj_matrix = p.computeProjectionMatrixFOV(fov=45,
+                                                     aspect=float(224) /224,
                                                      nearVal=0.1,
                                                      farVal=100.0)
-        (_, _, px, _, _) = p.getCameraImage(width=960,
-                                              height=720,
+        
+        (_, _, px, _, _) = p.getCameraImage(width=224,
+                                              height=224,
                                               viewMatrix=view_matrix,
                                               projectionMatrix=proj_matrix,
                                               renderer=p.ER_BULLET_HARDWARE_OPENGL)
 
         rgb_array = np.array(px, dtype=np.uint8)
-        rgb_array = np.reshape(rgb_array, (720,960, 4))
+        rgb_array = np.reshape(rgb_array, (224,224, 4))
 
         rgb_array = rgb_array[:, :, :3]
         return rgb_array
