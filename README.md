@@ -11,11 +11,6 @@ Gym-Dofbot is an reinforcement-learning friendly Gym environment that is powered
 
 ![gif](https://github.com/CharlesXu1124/gym-dofbot/blob/main/Demo/dofbot_gym.gif?raw=true)
 
-
-This text you see here is *actually- written in Markdown! To get a feel
-for Markdown's syntax, type some text into the left window and
-watch the results in the right.
-
 ## Installation
 
 Install the numpy, pybullet and gym.
