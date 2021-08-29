@@ -33,8 +33,8 @@ class DofbotEnv(gym.Env):
         state_dofbot = p.getLinkState(self.armUid, 4)[0]
         state_object, _ = p.getBasePositionAndOrientation(self.objectUid)
         
-        self.camera_pos = p.getLinkState(self.armUid, 6)[0]
-        self.cameraTargetPosition = p.getLinkState(self.armUid, 7)[0]
+        self.camera_pos = p.getLinkState(self.armUid, 5)[0]
+        self.cameraTargetPosition = p.getLinkState(self.armUid, 6)[0]
         # self.camera_bearing = p.getLinkState(self.armUid, 3)[1]
 
 
@@ -79,10 +79,9 @@ class DofbotEnv(gym.Env):
         p.changeVisualShape(self.armUid, 2, rgbaColor=[0,1,0,1])
         p.changeVisualShape(self.armUid, 3, rgbaColor=[1,0.647,0,1])
         p.changeVisualShape(self.armUid, 4, rgbaColor=[0,0,0,1])
-        p.changeVisualShape(self.armUid, 5, rgbaColor=[0,0,0,1])
+        p.changeVisualShape(self.armUid, 5, rgbaColor=[0,1,0,0])
         p.changeVisualShape(self.armUid, 6, rgbaColor=[0,0,1,0])
-        p.changeVisualShape(self.armUid, 7, rgbaColor=[0,0,0,0])
-        p.changeVisualShape(self.armUid, 8, rgbaColor=[1,0,0,0.5])
+        p.changeVisualShape(self.armUid, 7, rgbaColor=[1,0,0,0.5])
         # reset pose of all DOFBOT joints
         rest_poses_dofbot = [0, 0, 0, 0, 0] # stay upright
         
@@ -101,8 +100,8 @@ class DofbotEnv(gym.Env):
         print("Link 3 position: ", state_arm_3)
         print("Link 4 position: ", state_arm_4)
         
-        self.camera_pos = p.getLinkState(self.armUid, 6)[0]
-        self.cameraTargetPosition = p.getLinkState(self.armUid, 7)[0]
+        self.camera_pos = p.getLinkState(self.armUid, 5)[0]
+        self.cameraTargetPosition = p.getLinkState(self.armUid, 6)[0]
         # self.camera_bearing = p.getLinkState(self.armUid, 3)[1]
         
         # randomly place the object (somewhere near the DOFBOT)
