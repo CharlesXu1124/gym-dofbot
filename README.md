@@ -9,7 +9,7 @@ Gym-Dofbot is an reinforcement-learning friendly Gym environment that is powered
 - Allows precise position control for the servo group
 - Potential for multi-agent learning and object interaction
 
-![gif](https://github.com/CharlesXu1124/gym-dofbot/blob/main/Demo/dofbot_gym.gif?raw=true)
+![gif](https://github.com/CharlesXu1124/gym-dofbot/blob/main/Demo/dofbot-gym.gif?raw=true)
 
 ## Installation
 
