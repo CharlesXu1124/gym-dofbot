@@ -16,7 +16,7 @@ Gym-Dofbot is an reinforcement-learning friendly Gym environment that is powered
 Install the numpy, pybullet and gym.
 Install via pip:
 ```
-pip install gym-dofbot==0.1.0
+pip install gym-dofbot==0.1.1
 ```
 Install via Github repository:
 ```sh
