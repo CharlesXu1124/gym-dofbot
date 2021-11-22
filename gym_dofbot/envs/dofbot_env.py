@@ -54,6 +54,20 @@ class DofbotEnv(gym.Env):
         info = {'object_position': state_object}
         self.observation = state_dofbot
         return np.array(self.observation).astype(np.float32), reward, done, info
+    
+    def calcInverseKinematics(self, jointId, targetPosition):
+        orientation = p.getQuaternionFromEuler([-3.14159 / 2, 0, 0])
+        # calculate the desired joint position
+        targetPositionJoints = p.calculateInverseKinematics(self.armUid, jointId, targetPosition, targetOrientation=orientation)
+        
+        return targetPositionJoints
+    
+    
+    def setJointControl(self, controlArray):
+        p.setJointMotorControlArray(self.armUid, range(5), p.POSITION_CONTROL, targetPositions=controlArray)
+    
+    def getPosition(self, jointID):
+        return p.getLinkState(self.armUid, jointID)[0]
 
     def reset(self):
         self.step_counter = 0
@@ -70,14 +84,14 @@ class DofbotEnv(gym.Env):
         tableUid = p.loadURDF(os.path.join(urdfRootPath, "table/table.urdf"),basePosition=[0.5,0,-0.65])
         dofbot_path = os.path.join(os.path.dirname(__file__), 'arm.urdf')
         # load DOFBOT URDF
-        self.armUid = p.loadURDF(dofbot_path, basePosition=[0.75,-0.2,0], useFixedBase=True)
+        self.armUid = p.loadURDF(dofbot_path, basePosition=[0,-0.2,0], useFixedBase=True)
 
         # change the appearance of DOFBOT parts
         p.changeVisualShape(self.armUid, -1, rgbaColor=[0,0,0,1])
         p.changeVisualShape(self.armUid, 0, rgbaColor=[0,1,0,1])
         p.changeVisualShape(self.armUid, 1, rgbaColor=[1,1,0,1])
         p.changeVisualShape(self.armUid, 2, rgbaColor=[0,1,0,1])
-        p.changeVisualShape(self.armUid, 3, rgbaColor=[1,0.647,0,1])
+        p.changeVisualShape(self.armUid, 3, rgbaColor=[1,1,0,1])
         p.changeVisualShape(self.armUid, 4, rgbaColor=[0,0,0,1])
         p.changeVisualShape(self.armUid, 5, rgbaColor=[0,1,0,0])
         p.changeVisualShape(self.armUid, 6, rgbaColor=[0,0,1,0])
