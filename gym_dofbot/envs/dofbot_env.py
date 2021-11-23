@@ -7,6 +7,8 @@ import pybullet as p
 import pybullet_data
 import math
 import numpy as np
+
+
 import random
 
 
@@ -55,10 +57,12 @@ class DofbotEnv(gym.Env):
         self.observation = state_dofbot
         return np.array(self.observation).astype(np.float32), reward, done, info
     
+    
     def calcInverseKinematics(self, jointId, targetPosition):
+        # orientation is optional
         orientation = p.getQuaternionFromEuler([-3.14159 / 2, 0, 0])
         # calculate the desired joint position
-        targetPositionJoints = p.calculateInverseKinematics(self.armUid, jointId, targetPosition, targetOrientation=orientation)
+        targetPositionJoints = p.calculateInverseKinematics(self.armUid, jointId, targetPosition)
         
         return targetPositionJoints
     
