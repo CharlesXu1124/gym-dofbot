@@ -3,6 +3,7 @@ import gym_dofbot
 import time
 import math
 
+
 env = gym.make('dofbot-v0')
 
 env.reset()
@@ -17,14 +18,14 @@ counter = 0
 
 print("gripper point: ", env.getPosition(7))
 
-endPosition = env.getPosition(7)
+endPosition = env.getPosition(0)
 
 targetPosition = [endPosition[0] , endPosition[1] + 0.2, endPosition[2] + 0.1]
 
 targetPositionJoints = env.calcInverseKinematics(7, targetPosition)
 
 
-env.step([targetPositionJoints[0], targetPositionJoints[1], targetPositionJoints[2], targetPositionJoints[3], targetPositionJoints[4]])
+# env.step([targetPositionJoints[0], targetPositionJoints[1], targetPositionJoints[2], targetPositionJoints[3], targetPositionJoints[4]])
 
 
 
@@ -34,9 +35,10 @@ counter = 25
 
 while 1:
     env.render()
-    targetPosition = [endPosition[0] + 2 * math.sin(counter / 50), endPosition[1] + 0.2, endPosition[2] + 0.1]
+    targetPosition = [endPosition[0] + 0.3 * math.sin(counter / 50), endPosition[1] + 0.2, endPosition[2] + 0.01]
     targetPositionJoints = env.calcInverseKinematics(7, targetPosition)
     print(targetPositionJoints)
+    targetPositionJoints = [0, 0, 0, 0, 0]
     env.step([targetPositionJoints[0], targetPositionJoints[1], targetPositionJoints[2], targetPositionJoints[3], targetPositionJoints[4]])
     time.sleep(0.01)
     counter += 1
