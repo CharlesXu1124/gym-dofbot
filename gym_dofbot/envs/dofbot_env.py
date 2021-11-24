@@ -17,9 +17,12 @@ MAX_EPISODE_LEN = 20*100
 class DofbotEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self):
+    def __init__(self, DIRECT=False):
         self.step_counter = 0
-        p.connect(p.GUI)
+        if not DIRECT:
+            p.connect(p.GUI)
+        else:
+            p.connect(p.DIRECT) # DIRECT mode, useful when the simulation device does not have a GPU
         # p.resetDebugVisualizerCamera(cameraDistance=1.5, cameraYaw=0, cameraPitch=-40, cameraTargetPosition=[0.55,-0.35,0.2])
         self.action_space = spaces.Box(np.array([-1]*5), np.array([1]*5))
         self.observation_space = spaces.Box(np.array([-1]*5), np.array([1]*5))
